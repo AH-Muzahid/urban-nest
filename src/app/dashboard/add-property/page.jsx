@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { MdArrowBack, MdArrowForward, MdLocationOn, MdImage, MdVilla, MdQuestionAnswer, MdClose } from 'react-icons/md';
 import { toast } from 'react-hot-toast';
@@ -78,6 +79,7 @@ const AddPropertyPage = () => {
                     zip: '90210', // basic default
                     coordinates: formData.coordinates
                 });
+                toast.success('Property created successfully!');
                 router.push('/dashboard/listings');
             } catch (error) {
                 toast.error('Failed to create property: ' + (error.response?.data?.message || error.message));
@@ -344,9 +346,9 @@ const AddPropertyPage = () => {
                                             <button
                                                 key={idx}
                                                 onClick={() => setFormData(prev => ({ ...prev, images: [...prev.images, url] }))}
-                                                className="h-16 w-24 rounded-lg overflow-hidden border border-gray-200 hover:border-[#d4af37] transition-all shrink-0"
+                                                className="h-16 w-24 rounded-lg overflow-hidden border border-gray-200 hover:border-[#d4af37] transition-all shrink-0 relative"
                                             >
-                                                <img src={url} alt="Preset" className="w-full h-full object-cover" />
+                                                <Image src={url} alt="Preset" fill className="object-cover" unoptimized />
                                             </button>
                                         ))}
                                     </div>
@@ -356,7 +358,7 @@ const AddPropertyPage = () => {
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {formData.images.map((img, idx) => (
                                         <div key={idx} className="relative aspect-[4/3] group rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800">
-                                            <img src={img} alt={`Uploaded ${idx}`} className="w-full h-full object-cover" />
+                                            <Image src={img} alt={`Uploaded ${idx}`} fill className="object-cover" unoptimized />
                                             <button
                                                 onClick={() => setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }))}
                                                 className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -378,7 +380,7 @@ const AddPropertyPage = () => {
                                 {/* Preview Image Header */}
                                 <div className="h-64 w-full bg-gray-200 relative">
                                     {formData.images.length > 0 ? (
-                                        <img src={formData.images[0]} alt="Property Preview" className="w-full h-full object-cover" />
+                                        <Image src={formData.images[0]} alt="Property Preview" fill className="object-cover" unoptimized />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                                             <span className="text-sm font-bold uppercase tracking-widest">No Cover Image</span>
