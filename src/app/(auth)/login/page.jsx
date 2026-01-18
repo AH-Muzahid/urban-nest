@@ -56,14 +56,10 @@ export default function LoginPage() {
         googleId: user.uid
       });
 
-      // Assuming googleAuth service returns the user object with token directly
-      // Or if it returns axios response, access .data. 
-      // I'll make sure service returns data.
-
-      // Manually saving if service doesn't (safe bet based on previous code usually lacking it in component)
       if (response.token) {
         localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response));
+        const { token, ...user } = response;
+        localStorage.setItem('user', JSON.stringify(user));
       }
 
       router.push('/dashboard');
@@ -71,6 +67,28 @@ export default function LoginPage() {
     } catch (error) {
       console.error(error);
       toast.error('Google Login Failed');
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    const demoCredentials = {
+      email: 'zsamsuzzoha@gmail.com',
+      password: '123456'
+    };
+
+    // Fill the form visually
+    setFormData(demoCredentials);
+    setLoading(true);
+    setError('');
+
+    try {
+      const data = await login(demoCredentials);
+      router.push('/dashboard');
+      toast.success(`Welcome back, ${data.name}!`);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Demo login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -156,6 +174,15 @@ export default function LoginPage() {
             >
               {loading ? 'Signing in...' : 'Sign In'}
               {!loading && <MdArrowForward className="text-xl" />}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={loading}
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 rounded-xl shadow-xl shadow-gray-900/10 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              Demo Login
             </button>
           </form>
 
