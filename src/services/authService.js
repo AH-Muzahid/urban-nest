@@ -27,7 +27,14 @@ export const logout = () => {
 // Get current user
 export const getCurrentUser = () => {
     const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr) return null;
+    try {
+        return JSON.parse(userStr);
+    } catch (error) {
+        console.error("Error parsing user from local storage:", error);
+        localStorage.removeItem('user');
+        return null;
+    }
 };
 
 // Check if user is authenticated
