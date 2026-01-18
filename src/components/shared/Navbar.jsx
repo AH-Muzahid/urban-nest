@@ -3,27 +3,41 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MdDomain, MdMenu, MdClose, MdSearch, MdAdd, MdPerson, MdLogin, MdAppRegistration } from 'react-icons/md';
+import { MdDomain, MdMenu, MdClose, MdSearch, MdPerson, MdLogin, MdAppRegistration, MdAdd } from 'react-icons/md';
 import { getCurrentUser } from '@/services/authService';
 
 const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [user, setUser] = useState(null);
+    const [scrolled, setScrolled] = useState(false);
     const router = useRouter();
+    const pathname = usePathname();
+
+    const isHomePage = pathname === '/';
+    // Transparent only on HomePage AND when not scrolled
+    const isTransparent = isHomePage && !scrolled;
 
     useEffect(() => {
-        const currentUser = getCurrentUser();
-        // eslint-disable-next-line
-        setUser(currentUser);
+        const fetchUser = () => {
+            const currentUser = getCurrentUser();
+            setUser(currentUser);
+        };
+        fetchUser();
+    }, []);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     const navLinks = [
-        { name: 'Buy', href: '/properties?status=sale' },
-        { name: 'Rent', href: '/properties?status=rent' },
-        { name: 'Sell', href: '/contact' },
+        { name: 'Properties', href: '/properties' },
         { name: 'Agents', href: '/agents' },
         { name: 'About', href: '/about' },
         { name: 'Contact', href: '/contact' },
@@ -33,194 +47,156 @@ const Navbar = () => {
         e.preventDefault();
         if (searchQuery.trim()) {
             router.push(`/properties?search=${encodeURIComponent(searchQuery)}`);
+            setIsMobileMenuOpen(false);
         }
     };
-
-    const textColorClass = 'text-charcoal dark:text-white';
-    const logoColorClass = 'text-charcoal dark:text-white';
 
     return (
         <motion.nav
             initial={{ y: -100 }}
             animate={{ y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/90 dark:bg-charcoal/90 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 shadow-sm"
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${!isTransparent
+                ? 'bg-white/90 backdrop-blur-md border-b border-gray-100 py-2 shadow-sm'
+                : 'bg-transparent py-6'
+                }`}
         >
-            <div className="max-w-8xl mx-auto px-6 h-20 flex items-center justify-between transition-all duration-300">
-                {/* Left Section: Logo & Nav */}
-                <div className="flex items-center gap-12">
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <motion.div
-                            whileHover={{ rotate: 180 }}
-                            transition={{ duration: 0.6, ease: "easeInOut" }}
-                            className="size-10 bg-primary flex items-center justify-center rounded-full text-white shadow-lg shadow-primary/20"
-                        >
-                            <MdDomain className="text-xl" />
-                        </motion.div>
-                        <span className={`text-xl font-black tracking-tight uppercase leading-none transition-colors group-hover:text-primary ${logoColorClass}`}>
-                            UrbanNest
-                        </span>
-                    </Link>
+            <div className="max-w-[1920px] mx-auto px-6 md:px-12 flex items-center justify-between">
+                {/* Left: Logo */}
+                {/* Left: Logo */}
+                <Link href="/" className="flex items-center gap-2 group z-50">
+                    <MdDomain className="text-3xl text-[#d4af37] drop-shadow-sm transition-transform group-hover:scale-110" />
+                    <span className={`text-lg font-bold tracking-[0.2em] uppercase ${!isTransparent ? 'text-gray-900' : 'text-white'}`}>
+                        UrbanNest
+                    </span>
+                </Link>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden lg:flex items-center gap-8">
-                        {navLinks.map((link, index) => (
-                            <Link
-                                key={link.name}
-                                href={link.href}
-                                className={`text-sm font-bold transition-colors hover:text-primary ${textColorClass}`}
-                            >
-                                {link.name}
-                            </Link>
-                        ))}
-                    </div>
+                {/* Center: Desktop Nav */}
+                <div className="hidden lg:flex items-center gap-10 bg-white/10 backdrop-blur-sm px-8 py-3 rounded-full border border-white/20">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.name}
+                            href={link.href}
+                            className={`text-[11px] font-bold uppercase tracking-[0.2em] transition-all hover:text-[#d4af37] ${!isTransparent ? 'text-gray-600' : 'text-white'}`}
+                        >
+                            {link.name}
+                        </Link>
+                    ))}
                 </div>
 
-                {/* Right Section: Actions */}
-                <div className="flex items-center gap-4">
-                    {/* Search Bar - Desktop */}
-                    <form onSubmit={handleSearch} className="hidden md:flex items-center bg-gray-100 dark:bg-gray-800/50 rounded-full px-4 py-2.5 w-64 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                        <MdSearch className="text-gray-400 text-xl shrink-0" />
-                        <input
-                            type="text"
-                            placeholder="Search locations..."
-                            className="bg-transparent border-none outline-none text-sm ml-2 w-full text-charcoal dark:text-white placeholder:text-gray-400"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </form>
+                {/* Right: Actions */}
+                <div className="flex items-center gap-5 z-50">
+                    {/* Search Icon (Desktop) */}
+                    <button
+                        aria-label="Search Properties"
+                        className={`hidden md:flex items-center justify-center size-10 rounded-full transition-colors ${!isTransparent ? 'text-gray-900 hover:bg-gray-100' : 'text-white hover:bg-white/20'}`}
+                    >
+                        <MdSearch className="text-xl" />
+                    </button>
 
                     {user ? (
                         <>
-                            {/* List Property Button */}
-                            <Link href="/dashboard/add-property">
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="hidden md:flex items-center gap-2 bg-primary hover:bg-yellow-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-primary/20 transition-colors"
-                                >
-                                    <MdAdd className="text-lg" />
-                                    <span>List Property</span>
-                                </motion.button>
-                            </Link>
-
-                            {/* User Profile */}
                             <Link href="/dashboard" className="hidden md:flex">
-                                <div className="size-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-primary flex items-center justify-center border-2 border-white dark:border-gray-700 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
-                                    {user.avatar ? (
-                                        <Image
-                                            src={user.avatar}
-                                            alt="Profile"
-                                            fill
-                                            className="object-cover"
-                                            unoptimized
-                                        />
-                                    ) : (
-                                        <MdPerson className="text-xl" />
-                                    )}
+                                <div className="flex items-center gap-2 overflow-hidden px-1">
+                                    <div className="size-9 rounded-full bg-gray-200 border border-white shadow-inner relative overflow-hidden">
+                                        {user.avatar ? (
+                                            <Image src={user.avatar} alt="Profile" fill className="object-cover" />
+                                        ) : (
+                                            <MdPerson className="text-gray-500 text-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                        )}
+                                    </div>
+                                    <span className={`text-xs font-bold uppercase ${!isTransparent ? 'text-gray-900' : 'text-white'}`}>Account</span>
                                 </div>
                             </Link>
                         </>
                     ) : (
                         <div className="hidden md:flex items-center gap-4">
-                            <Link href="/login" className={`font-bold text-sm ${textColorClass} hover:text-primary transition-colors`}>
+                            <Link
+                                href="/login"
+                                className={`text-[11px] font-bold uppercase tracking-widest hover:text-[#d4af37] transition-colors ${!isTransparent ? 'text-gray-900' : 'text-white'}`}
+                            >
                                 Sign In
                             </Link>
                             <Link href="/register">
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="bg-primary hover:bg-yellow-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-primary/20 transition-colors"
-                                >
-                                    Register
-                                </motion.button>
+                                <span className={`px-6 py-3 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all ${!isTransparent ? 'bg-[#1a1a1a] text-white hover:bg-[#d4af37]' : 'bg-white text-[#1a1a1a] hover:bg-white/90'}`}>
+                                    Join
+                                </span>
                             </Link>
                         </div>
                     )}
 
-                    {/* Mobile Menu Button */}
+                    {/* Mobile Menu Toggle */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className={`lg:hidden text-2xl transition-colors ${textColorClass}`}
+                        className={`lg:hidden text-2xl p-2 ${!isTransparent ? 'text-gray-900' : 'text-gray-900 md:text-white'}`}
+                        aria-label="Toggle Menu"
+                        aria-expanded={isMobileMenuOpen}
                     >
                         {isMobileMenuOpen ? <MdClose /> : <MdMenu />}
                     </button>
                 </div>
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu Overlay */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="lg:hidden bg-white dark:bg-charcoal border-t border-gray-100 dark:border-gray-800 overflow-hidden"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed inset-0 top-20 bg-white z-40 lg:hidden flex flex-col pt-6 px-6 pb-20 overflow-y-auto"
                     >
-                        <div className="px-6 py-6 space-y-6">
-                            {/* Mobile Search */}
-                            <form onSubmit={handleSearch} className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl px-4 py-3">
-                                <MdSearch className="text-gray-400 text-xl" />
-                                <input
-                                    type="text"
-                                    placeholder="Search properties..."
-                                    className="bg-transparent border-none outline-none text-sm ml-2 w-full text-charcoal dark:text-white"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </form>
+                        <form onSubmit={handleSearch} className="mb-8 relative" role="search">
+                            <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+                            <input
+                                type="text"
+                                placeholder="Search properties..."
+                                className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 pl-12 pr-4 text-sm font-bold outline-none focus:border-[#d4af37] transition-colors"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </form>
 
-                            <div className="flex flex-col gap-4">
-                                {navLinks.map((link) => (
+                        <div className="flex flex-col gap-6">
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.name}
+                                    href={link.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="text-2xl font-black text-gray-900 hover:text-[#d4af37] transition-colors"
+                                >
+                                    {link.name}
+                                </Link>
+                            ))}
+                        </div>
+
+                        <div className="mt-auto pt-10 border-t border-gray-100 flex flex-col gap-4">
+                            {user ? (
+                                <Link
+                                    href="/dashboard"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="bg-black text-white w-full py-4 rounded-xl font-bold uppercase tracking-widest text-center"
+                                >
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-4">
                                     <Link
-                                        key={link.name}
-                                        href={link.href}
+                                        href="/login"
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className="text-lg font-bold text-charcoal dark:text-white hover:text-primary transition-colors"
+                                        className="bg-gray-100 text-gray-900 w-full py-4 rounded-xl font-bold uppercase tracking-widest text-center"
                                     >
-                                        {link.name}
+                                        Sign In
                                     </Link>
-                                ))}
-                            </div>
-
-                            <div className="pt-6 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-4">
-                                {user ? (
-                                    <>
-                                        <Link
-                                            href="/dashboard/add-property"
-                                            className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all w-full"
-                                        >
-                                            <MdAdd className="text-xl" />
-                                            List Property
-                                        </Link>
-                                        <Link
-                                            href="/dashboard"
-                                            className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 text-charcoal dark:text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all w-full"
-                                        >
-                                            <MdPerson className="text-xl" />
-                                            Dashboard
-                                        </Link>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Link
-                                            href="/login"
-                                            className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 text-charcoal dark:text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all w-full"
-                                        >
-                                            <MdLogin className="text-xl" />
-                                            Sign In
-                                        </Link>
-                                        <Link
-                                            href="/register"
-                                            className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all w-full"
-                                        >
-                                            <MdAppRegistration className="text-xl" />
-                                            Register
-                                        </Link>
-                                    </>
-                                )}
-                            </div>
+                                    <Link
+                                        href="/register"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="bg-black text-white w-full py-4 rounded-xl font-bold uppercase tracking-widest text-center"
+                                    >
+                                        Register
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 )}

@@ -24,117 +24,97 @@ const Footer = () => {
         { icon: MdShare, href: '#', label: 'Share' },
     ];
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-            },
-        },
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 },
-    };
-
     return (
-        <footer className="bg-charcoal text-white pt-24 pb-12">
-            <div className="max-w-8xl mx-auto px-6">
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20"
-                >
-                    {/* Brand Section */}
-                    <motion.div variants={itemVariants}>
+        <footer className="bg-[#1a1a1a] text-white pt-32 pb-10 relative overflow-hidden">
+            {/* Massive Watermark */}
+            <div className="absolute bottom-[-5%] left-1/2 -translate-x-1/2 select-none pointer-events-none opacity-[0.03]">
+                <span className="text-[12rem] md:text-[20rem] font-bold tracking-tighter whitespace-nowrap">
+                    URBAN NEST
+                </span>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-24">
+                    {/* Brand Section (4 cols) */}
+                    <div className="lg:col-span-5">
                         <div className="flex items-center gap-3 mb-8">
-                            <div className="size-8 bg-primary flex items-center justify-center rounded text-white">
-                                <MdDomain className="text-xl" />
+                            <div className="size-10 bg-[#d4af37] flex items-center justify-center rounded text-white shadow-lg shadow-[#d4af37]/20">
+                                <MdDomain className="text-2xl" />
                             </div>
-                            <h2 className="text-xl font-extrabold tracking-tight uppercase">UrbanNest</h2>
+                            <h2 className="text-2xl font-black tracking-tighter uppercase text-white">UrbanNest</h2>
                         </div>
-                        <p className="text-gray-500 text-sm leading-relaxed mb-8">
-                            The world&apos;s premier destination for luxury architectural assets. Specializing in discrete high-value transactions.
+                        <p className="text-gray-500 text-sm leading-relaxed mb-10 max-w-sm">
+                            The world&apos;s premier destination for luxury architectural assets. Specializing in discrete high-value transactions for the discerning few.
                         </p>
                         <div className="flex gap-4">
                             {socialLinks.map((social, index) => (
-                                <motion.a
+                                <Link
                                     key={index}
                                     href={social.href}
-                                    whileHover={{ scale: 1.1, borderColor: '#d4af35' }}
-                                    whileTap={{ scale: 0.9 }}
-                                    className="size-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
+                                    className="size-10 rounded-full border border-gray-800 flex items-center justify-center text-gray-500 hover:text-[#d4af37] hover:border-[#d4af37] transition-all duration-300 bg-gray-900/50"
                                     aria-label={social.label}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                 >
                                     <social.icon className="text-lg" />
-                                </motion.a>
+                                </Link>
                             ))}
                         </div>
-                    </motion.div>
+                    </div>
 
-                    {/* Portfolio Links */}
-                    <motion.div variants={itemVariants}>
-                        <h4 className="font-bold uppercase tracking-widest text-xs mb-8 text-primary">Portfolio</h4>
+                    {/* Links Section (8 cols split) */}
+                    <div className="lg:col-span-2">
+                        <h4 className="font-bold uppercase tracking-[0.2em] text-[10px] text-gray-300 mb-8">Portfolio</h4>
                         <ul className="space-y-4 text-sm text-gray-500">
                             {portfolioLinks.map((link) => (
                                 <li key={link.name}>
-                                    <Link href={link.href} className="hover:text-white transition-colors inline-block hover:translate-x-1 transition-transform">
+                                    <Link href={link.href} className="hover:text-[#d4af37] transition-colors inline-block">
                                         {link.name}
                                     </Link>
                                 </li>
                             ))}
                         </ul>
-                    </motion.div>
+                    </div>
 
-                    {/* Company Links */}
-                    <motion.div variants={itemVariants}>
-                        <h4 className="font-bold uppercase tracking-widest text-xs mb-8 text-primary">Company</h4>
+                    <div className="lg:col-span-2">
+                        <h4 className="font-bold uppercase tracking-[0.2em] text-[10px] text-gray-300 mb-8">Company</h4>
                         <ul className="space-y-4 text-sm text-gray-500">
                             {companyLinks.map((link) => (
                                 <li key={link.name}>
-                                    <Link href={link.href} className="hover:text-white transition-colors inline-block hover:translate-x-1 transition-transform">
+                                    <Link href={link.href} className="hover:text-[#d4af37] transition-colors inline-block">
                                         {link.name}
                                     </Link>
                                 </li>
                             ))}
                         </ul>
-                    </motion.div>
+                    </div>
 
-                    {/* Contact Info */}
-                    <motion.div variants={itemVariants}>
-                        <h4 className="font-bold uppercase tracking-widest text-xs mb-8 text-primary">Contact</h4>
-                        <ul className="space-y-4 text-sm text-gray-500">
-                            <li className="flex items-center gap-3">
-                                <MdCall className="text-primary text-base flex-shrink-0" />
-                                <a href="tel:+18005898726" className="hover:text-white transition-colors">+1 (800) LUX-URBN</a>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <MdMail className="text-primary text-base flex-shrink-0" />
-                                <a href="mailto:concierge@urbannest.com" className="hover:text-white transition-colors">concierge@urbannest.com</a>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <MdLocationOn className="text-primary text-base flex-shrink-0 mt-0.5" />
-                                <span>
+                    <div className="lg:col-span-3">
+                        <h4 className="font-bold uppercase tracking-[0.2em] text-[10px] text-gray-300 mb-8">Contact</h4>
+                        <ul className="space-y-6 text-sm text-gray-500">
+                            <li className="flex items-start gap-3 group cursor-pointer">
+                                <MdLocationOn className="text-[#d4af37] text-lg flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                                <span className="group-hover:text-gray-300 transition-colors">
                                     Fifth Avenue, Suite 1200<br />New York, NY 10001
                                 </span>
                             </li>
+                            <li className="flex items-center gap-3 group cursor-pointer">
+                                <MdCall className="text-[#d4af37] text-lg flex-shrink-0 group-hover:scale-110 transition-transform" />
+                                <a href="tel:+18005898726" className="group-hover:text-gray-300 transition-colors">+1 (800) LUX-URBN</a>
+                            </li>
+                            <li className="flex items-center gap-3 group cursor-pointer">
+                                <MdMail className="text-[#d4af37] text-lg flex-shrink-0 group-hover:scale-110 transition-transform" />
+                                <a href="mailto:concierge@urbannest.com" className="group-hover:text-gray-300 transition-colors">concierge@urbannest.com</a>
+                            </li>
                         </ul>
-                    </motion.div>
-                </motion.div>
+                    </div>
+                </div>
 
                 {/* Bottom Bar */}
-                <div className="pt-12 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-gray-600 text-xs">© 2024 UrbanNest Luxury Group. All Rights Reserved.</p>
-                    <div className="flex gap-8 text-xs text-gray-600">
-                        <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Cookie Settings</Link>
+                <div className="pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <p className="text-gray-600 text-[10px] uppercase tracking-wider">© 2024 UrbanNest Luxury Group.</p>
+                    <div className="flex gap-8 text-[10px] uppercase tracking-wider text-gray-600">
+                        <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
+                        <Link href="#" className="hover:text-white transition-colors">Terms</Link>
+                        <Link href="#" className="hover:text-white transition-colors">Cookies</Link>
                     </div>
                 </div>
             </div>

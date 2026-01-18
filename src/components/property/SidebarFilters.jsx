@@ -41,9 +41,12 @@ const SidebarFilters = ({ className = "" }) => {
     };
 
     const propertyTypes = [
-        { name: 'Penthouse', value: 'penthouse', icon: MdApartment },
+        { name: 'House', value: 'house', icon: MdHome },
+        { name: 'Apartment', value: 'apartment', icon: MdApartment },
+        { name: 'Condo', value: 'condo', icon: MdApartment },
         { name: 'Villa', value: 'villa', icon: MdVilla },
-        { name: 'Mansion', value: 'mansion', icon: MdHome },
+        { name: 'Penthouse', value: 'penthouse', icon: MdApartment },
+        { name: 'Mansion', value: 'mansion', icon: MdVilla },
         { name: 'Estate', value: 'estate', icon: MdHolidayVillage },
     ];
 

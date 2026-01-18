@@ -10,20 +10,11 @@ const Newsletter = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!email) {
             toast.error('Please enter your email address');
             return;
         }
-
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            toast.error('Please enter a valid email address');
-            return;
-        }
-
         setIsLoading(true);
-
-        // Simulate API call
         setTimeout(() => {
             toast.success('Successfully subscribed to our newsletter!');
             setEmail('');
@@ -32,7 +23,7 @@ const Newsletter = () => {
     };
 
     return (
-        <section className="py-20 bg-primary/10 border-y border-primary/20">
+        <section className="py-24 bg-white border-t border-gray-100">
             <div className="max-w-4xl mx-auto px-6 text-center">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -40,32 +31,29 @@ const Newsletter = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                 >
-                    <h2 className="text-3xl font-extrabold tracking-tight mb-4">
-                        JOIN THE INNER CIRCLE
+                    <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-4">
+                        Join The Inner Circle
                     </h2>
-                    <p className="text-gray-600 dark:text-gray-400 mb-8 font-light">
-                        Receive early access to off-market listings and architectural insights.
+                    <p className="text-gray-500 mb-10 font-light">
+                        Receive early access to off-market listings and architectural insights within Urban Nest.
                     </p>
 
                     <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
-                        <motion.input
-                            whileFocus={{ scale: 1.02 }}
-                            className="flex-1 px-6 py-4 rounded-xl border-gray-200 focus:ring-primary focus:border-primary outline-none transition-all"
+                        <input
+                            className="flex-1 px-6 py-4 rounded-full border border-gray-200 focus:ring-2 focus:ring-[#d4af37] focus:border-transparent outline-none transition-all bg-gray-50 placeholder:text-gray-400"
                             placeholder="Email Address"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={isLoading}
                         />
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                        <button
                             type="submit"
                             disabled={isLoading}
-                            className="bg-primary text-white font-bold px-8 py-4 rounded-xl hover:brightness-110 transition-all uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+                            className="bg-[#d4af37] text-white font-bold px-8 py-4 rounded-full hover:bg-[#b08d2b] transition-all uppercase tracking-widest text-sm shadow-lg shadow-[#d4af37]/20 disabled:opacity-50"
                         >
-                            {isLoading ? 'Subscribing...' : 'Subscribe'}
-                        </motion.button>
+                            {isLoading ? '...' : 'Subscribe'}
+                        </button>
                     </form>
                 </motion.div>
             </div>

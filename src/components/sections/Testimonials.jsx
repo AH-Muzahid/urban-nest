@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdFormatQuote } from 'react-icons/md';
 
@@ -27,6 +27,14 @@ const Testimonials = () => {
             position: 'Investment Banker',
         },
     ];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveIndex((current) => (current + 1) % testimonials.length);
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [testimonials.length]);
 
     return (
         <section className="py-24 max-w-5xl mx-auto px-6 text-center">
