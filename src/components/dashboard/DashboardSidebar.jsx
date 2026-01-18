@@ -1,12 +1,73 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { MdDashboard, MdFormatListBulleted, MdAddCircle, MdPerson, MdAnalytics, MdLogout, MdDomain, MdChevronLeft, MdChevronRight, MdHome } from 'react-icons/md';
-import { usePathname } from 'next/navigation';
+import { MdDashboard, MdFormatListBulleted, MdAddCircle, MdPerson, MdAnalytics, MdLogout, MdDomain, MdChevronLeft, MdChevronRight, MdHome, MdMail } from 'react-icons/md';
+import { usePathname, useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { getCurrentUser } from '@/services/authService';
+import { toast } from 'react-hot-toast';
 
 const DashboardSidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
     const pathname = usePathname();
+    const router = useRouter();
     const isActive = (path) => pathname === path;
+    const [user, setUser] = useState({ name: '', role: '', email: '' });
+
+    useEffect(() => {
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            setUser(currentUser);
+        }
+    }, []);
+
+    const performLogout = async () => {
+        try {
+            await signOut(auth);
+        } catch (error) {
+            console.error('Logout failed', error);
+        } finally {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            router.push('/login');
+        }
+    };
+
+    const handleLogout = () => {
+        toast((t) => (
+            <div className="flex flex-col gap-3 min-w-[200px]">
+                <p className="font-bold text-sm text-center text-gray-800">Sign out of UrbanNest?</p>
+                <div className="flex gap-2 justify-center">
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="px-4 py-1.5 text-xs font-bold bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={() => {
+                            toast.dismiss(t.id);
+                            performLogout();
+                        }}
+                        className="px-4 py-1.5 text-xs font-bold bg-primary text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                    >
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        ), {
+            id: 'logout-confirmation',
+            duration: 4000,
+            position: 'bottom-left',
+            style: {
+                border: '1px solid #e5e7eb',
+                padding: '16px',
+                color: '#1f2937',
+            },
+        });
+    };
 
     return (
         <>
@@ -55,6 +116,7 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
                         { href: '/dashboard/listings', icon: MdFormatListBulleted, label: 'My Listings' },
                         { href: '/dashboard/add-property', icon: MdAddCircle, label: 'Add New' },
                         { href: '/dashboard/profile', icon: MdPerson, label: 'Profile' },
+                        { href: '/dashboard/messages', icon: MdMail, label: 'Messages' },
                         { href: '/dashboard/insights', icon: MdAnalytics, label: 'Insights' },
                         { href: '/', icon: MdHome, label: 'Home' },
                     ].map((link) => (
@@ -84,13 +146,20 @@ const DashboardSidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
                 <div className="p-3 mt-auto">
                     <div className={`bg-[#2d3748] rounded-xl transition-all duration-300 border border-gray-700 ${isCollapsed ? 'p-2' : 'p-4'}`}>
                         <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center mb-0' : 'mb-3'}`}>
-                            <div className="size-8 rounded-full bg-[#d4af37] flex items-center justify-center text-[#1f2937] font-bold shrink-0 text-xs">AT</div>
+                            <div className="size-8 rounded-full bg-[#d4af37] flex items-center justify-center text-[#1f2937] font-bold shrink-0 text-xs overflow-hidden relative">
+                                {user.avatar ? (
+                                    <Image src={user.avatar} alt="Profile" fill className="object-cover" unoptimized />
+                                ) : (
+                                    <span>{user.name ? user.name.substring(0, 2).toUpperCase() : 'UN'}</span>
+                                )}
+                            </div>
                             <div className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-                                <h4 className="text-xs font-bold text-white">Alexander Thorne</h4>
-                                <p className="text-[10px] text-gray-400">Senior Partner</p>
+                                <h4 className="text-xs font-bold text-white">{user.name || 'User'}</h4>
+                                <p className="text-[10px] text-gray-400">{user.role || 'Guest'}</p>
                             </div>
                         </div>
                         <button
+                            onClick={handleLogout}
                             className={`
                                 w-full py-2 bg-[#1f2937] hover:bg-gray-800 rounded-lg text-[10px] font-bold text-gray-300 flex items-center justify-center gap-2 transition-colors border border-gray-700
                                 ${isCollapsed ? 'hidden' : 'flex'}

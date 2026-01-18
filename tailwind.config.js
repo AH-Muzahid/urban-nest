@@ -15,6 +15,9 @@ module.exports = {
                 "background-dark": "#1f2937",
                 charcoal: "#1f2937",
             },
+            maxWidth: {
+                "8xl": "92rem",
+            },
             fontFamily: {
                 display: ["var(--font-manrope)", "sans-serif"],
             },

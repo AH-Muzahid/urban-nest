@@ -3,8 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { login } from '@/services/authService';
+import { login, googleAuth } from '@/services/authService';
 import { MdEmail, MdLock, MdArrowForward } from 'react-icons/md';
+import { FcGoogle } from 'react-icons/fc';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '@/lib/firebase';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,12 +32,45 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(formData);
+      const data = await login(formData);
+      // Login service handles token storage usually, if not we do it here
+      // But based on previous Login page, it just awaited login(formData).
       router.push('/dashboard');
+      toast.success(`Welcome back, ${data.name}!`);
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      const response = await googleAuth({
+        email: user.email,
+        name: user.displayName,
+        avatar: user.photoURL,
+        googleId: user.uid
+      });
+
+      // Assuming googleAuth service returns the user object with token directly
+      // Or if it returns axios response, access .data. 
+      // I'll make sure service returns data.
+
+      // Manually saving if service doesn't (safe bet based on previous code usually lacking it in component)
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response));
+      }
+
+      router.push('/dashboard');
+      toast.success('Logged in with Google!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Google Login Failed');
     }
   };
 
@@ -121,6 +158,24 @@ export default function LoginPage() {
               {!loading && <MdArrowForward className="text-xl" />}
             </button>
           </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-background-light dark:bg-background-dark text-gray-500 font-medium tracking-wide">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-bold py-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all flex items-center justify-center gap-3 shadow-sm"
+          >
+            <FcGoogle className="text-2xl" />
+            Sign in with Google
+          </button>
 
           <div className="text-center pt-4">
             <p className="text-gray-500 dark:text-gray-400 font-medium">

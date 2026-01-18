@@ -1,106 +1,160 @@
 'use client';
 
+// Imports
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { MdLocationOn, MdPayments, MdHomeWork, MdSearch } from 'react-icons/md';
+import { MdLocationOn, MdPayments, MdHomeWork, MdSearch, MdKeyboardArrowDown } from 'react-icons/md';
 
 const HeroSection = () => {
+    const router = useRouter();
+    const [searchFilters, setSearchFilters] = useState({
+        location: '',
+        price: '',
+        type: ''
+    });
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleSearch = () => {
+        const params = new URLSearchParams();
+        if (searchFilters.location) params.append('location', searchFilters.location);
+
+        // Use maxPrice for budget filter
+        const cleanPrice = searchFilters.price.replace(/[^0-9]/g, '');
+        if (cleanPrice) params.append('maxPrice', cleanPrice);
+
+        if (searchFilters.type && searchFilters.type !== 'All Types') params.append('type', searchFilters.type.toLowerCase());
+
+        router.push(`/properties?${params.toString()}`);
+    };
+
     return (
-        <section className="relative h-[90vh] min-h-[700px] w-full flex items-center justify-center pt-20">
-            {/* Background Image with Overlay */}
-            <div className="absolute inset-0 overflow-hidden">
-                <motion.div
-                    initial={{ scale: 1.1 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    className="absolute inset-0 bg-cover bg-center"
+        <section className="relative h-screen min-h-[700px] w-full flex items-center justify-center">
+            {/* Background Image */}
+            <div className="absolute inset-0 z-0">
+                <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                     style={{
-                        backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuDtCMpcda56VkVQTjG1NzjBsfTwz2rz2OoPMpeEcP2TRRvsliwyRM4Yq8VX-Sy2CuLkuD_tw2unTmTA3jmmUtd_B4j-lpzq4R1BJnjxxwSXZLHCfAkTmzguAFOpH8NoC3677dp0FBdmMivasxu5X2Tu_KYKthtsDn2OMY0GHm44mmXD5vwOKY1lxu1CKY5OP3xH8FnroZVIDDU5vaUhkc4ABWCSNmcnOuyTlCBfTwDjRcGC9UuTpQXMJBLiNfHUdToatZCvXqb1XeaD')`,
+                        backgroundImage: `url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop')`,
                     }}
-                />
+                >
+                    <div className="absolute inset-0 bg-black/50" />
+                </div>
             </div>
 
             {/* Content */}
-            <div className="relative z-10 text-center px-6 max-w-5xl mx-auto mt-20">
-                <motion.span
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="text-primary font-bold tracking-[0.3em] uppercase text-xs mb-4 block"
-                >
-                    Exclusivity • Luxury • Privacy
-                </motion.span>
+            <div className="relative z-10 w-full px-6 max-w-7xl mx-auto flex flex-col items-center pt-20">
+
                 <motion.h1
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="text-white text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[1]"
+                    transition={{ duration: 0.8 }}
+                    className="text-white text-5xl md:text-7xl font-bold tracking-tight text-center mb-6 leading-tight drop-shadow-2xl"
                 >
-                    FIND YOUR SANCTUARY
+                    Discover Your <br />
+                    <span className="text-white">Dream Home</span>
                 </motion.h1>
 
                 <motion.p
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                    className="text-white/80 text-lg md:text-xl font-medium mb-12 max-w-2xl mx-auto leading-relaxed"
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className="text-white text-lg md:text-2xl font-medium text-center mb-12 max-w-2xl drop-shadow-lg"
                 >
-                    Discover curated luxury properties in the world&apos;s most desirable locations. Where architectural excellence meets timeless elegance.
+                    Explore the finest properties in the most desirable locations.
                 </motion.p>
 
-                {/* Search Bar */}
+                {/* Clean White Search Bar */}
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                    className="bg-white/10 backdrop-blur-xl p-3 rounded-2xl md:rounded-full border border-white/20 shadow-2xl flex flex-col md:flex-row items-center gap-2 max-w-4xl mx-auto"
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    className="bg-white p-4 rounded-3xl shadow-2xl flex flex-col lg:flex-row items-center gap-4 w-full max-w-5xl mx-auto relative z-50"
                 >
-                    {/* Location Input */}
-                    <div className="flex-1 flex items-center px-6 py-4 w-full group relative">
-                        <MdLocationOn className="text-white/70 mr-3 text-2xl" />
-                        <input
-                            className="bg-transparent border-none focus:ring-0 w-full placeholder:text-white/50 text-white font-bold outline-none"
-                            placeholder="Location"
-                            type="text"
-                        />
-                        <div className="absolute bottom-2 left-6 right-6 h-px bg-white/10 group-focus-within:bg-primary transition-colors"></div>
+                    {/* Inputs */}
+                    <div className="flex-1 w-full px-4 border-b lg:border-b-0 lg:border-r border-gray-100 pb-4 lg:pb-0">
+                        <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Location</label>
+                        <div className="flex items-center gap-2">
+                            <MdLocationOn className="text-[#d4af37] text-xl" />
+                            <input
+                                className="w-full font-bold text-gray-800 placeholder:text-gray-300 outline-none text-lg"
+                                placeholder="City or Zip"
+                                value={searchFilters.location}
+                                onChange={(e) => setSearchFilters({ ...searchFilters, location: e.target.value })}
+                            />
+                        </div>
                     </div>
 
-                    <div className="hidden md:block w-px h-10 bg-white/10"></div>
-
-                    {/* Price Range Input */}
-                    <div className="flex-1 flex items-center px-6 py-4 w-full group relative">
-                        <MdPayments className="text-white/70 mr-3 text-2xl" />
-                        <input
-                            className="bg-transparent border-none focus:ring-0 w-full placeholder:text-white/50 text-white font-bold outline-none"
-                            placeholder="Price Range"
-                            type="text"
-                        />
-                        <div className="absolute bottom-2 left-6 right-6 h-px bg-white/10 group-focus-within:bg-primary transition-colors"></div>
+                    <div className="flex-1 w-full px-4 border-b lg:border-b-0 lg:border-r border-gray-100 pb-4 lg:pb-0">
+                        <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Budget</label>
+                        <div className="flex items-center gap-2">
+                            <MdPayments className="text-[#d4af37] text-xl" />
+                            <input
+                                className="w-full font-bold text-gray-800 placeholder:text-gray-300 outline-none text-lg"
+                                placeholder="Max Price"
+                                value={searchFilters.price}
+                                onChange={(e) => setSearchFilters({ ...searchFilters, price: e.target.value })}
+                            />
+                        </div>
                     </div>
 
-                    <div className="hidden md:block w-px h-10 bg-white/10"></div>
+                    <div className="flex-1 w-full px-4 pb-4 lg:pb-0 relative" ref={dropdownRef}>
+                        <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Type</label>
+                        <div
+                            className="flex items-center gap-2 cursor-pointer"
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        >
+                            <MdHomeWork className="text-[#d4af37] text-xl shrink-0" />
+                            <div className="w-full font-bold text-gray-800 text-lg flex items-center justify-between select-none">
+                                <span className="truncate">{searchFilters.type || 'All Types'}</span>
+                                <MdKeyboardArrowDown className={`text-gray-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                            </div>
+                        </div>
 
-                    {/* Property Type Select */}
-                    <div className="flex-1 flex items-center px-6 py-4 w-full group relative">
-                        <MdHomeWork className="text-white/70 mr-3 text-2xl" />
-                        <select className="bg-transparent border-none focus:ring-0 w-full text-white/50 font-bold outline-none cursor-pointer appearance-none">
-                            <option className="text-charcoal bg-white">Property Type</option>
-                            <option className="text-charcoal bg-white">Penthouse</option>
-                            <option className="text-charcoal bg-white">Villa</option>
-                            <option className="text-charcoal bg-white">Estate</option>
-                        </select>
-                        <div className="absolute bottom-2 left-6 right-6 h-px bg-white/10 group-focus-within:bg-primary transition-colors"></div>
+                        {/* Custom Dropdown Menu */}
+                        <div className={`absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-[100] overflow-y-auto max-h-60 transition-all duration-200 origin-top ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}>
+                            <div
+                                className={`px-6 py-3 hover:bg-gray-50 cursor-pointer font-bold text-sm transition-colors ${searchFilters.type === '' ? 'text-[#d4af37] bg-gray-50' : 'text-gray-600 hover:text-[#d4af37]'}`}
+                                onClick={() => {
+                                    setSearchFilters({ ...searchFilters, type: '' });
+                                    setIsDropdownOpen(false);
+                                }}
+                            >
+                                All Types
+                            </div>
+                            {['Penthouse', 'Villa', 'Estate', 'Apartment', 'Condo'].map((type) => (
+                                <div
+                                    key={type}
+                                    className={`px-6 py-3 hover:bg-gray-50 cursor-pointer font-bold text-sm transition-colors ${searchFilters.type === type ? 'text-[#d4af37] bg-gray-50' : 'text-gray-600 hover:text-[#d4af37]'}`}
+                                    onClick={() => {
+                                        setSearchFilters({ ...searchFilters, type: type });
+                                        setIsDropdownOpen(false);
+                                    }}
+                                >
+                                    {type}
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Search Button */}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-full md:w-auto bg-primary hover:bg-[#b08d2b] text-white font-bold px-10 py-5 rounded-xl md:rounded-full flex items-center justify-center gap-2 transition-all shadow-lg"
+                    <button
+                        onClick={handleSearch}
+                        className="bg-[#d4af37] hover:bg-[#b08d2b] text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg w-full lg:w-auto min-w-[140px] flex justify-center items-center gap-2"
                     >
                         <MdSearch className="text-xl" />
-                        SEARCH
-                    </motion.button>
+                        Search
+                    </button>
                 </motion.div>
             </div>
         </section>

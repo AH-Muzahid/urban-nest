@@ -18,7 +18,7 @@ const WhyChooseUs = () => {
     ];
 
     return (
-        <section className="py-32 bg-charcoal text-white">
+        <section id="about" className="py-32 bg-charcoal text-white">
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                 {/* Left Content */}
                 <motion.div

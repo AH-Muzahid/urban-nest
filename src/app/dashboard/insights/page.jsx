@@ -13,7 +13,53 @@ const itemVariants = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
 };
 
+import { useState, useEffect } from 'react';
+import { getUserProperties } from '@/services/propertyService';
+import { getReceivedInquiries } from '@/services/inquiryService';
+
 const InsightsPage = () => {
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({ totalViews: 0, topListings: [] });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [properties, inquiries] = await Promise.all([
+                    getUserProperties(),
+                    getReceivedInquiries()
+                ]);
+
+                // Calculate Total Views
+                const totalViews = properties.reduce((acc, curr) => acc + (curr.views || 0), 0);
+
+                // Process Top Listings
+                const processedListings = properties.map(property => {
+                    const propertyInquiries = inquiries.filter(inq => inq.property?._id === property._id).length;
+                    // Mock engagement score based on views and inquiries
+                    const score = Math.min(100, Math.round(((property.views || 0) * 0.1) + (propertyInquiries * 5)));
+
+                    return {
+                        _id: property._id,
+                        title: property.title,
+                        location: property.location,
+                        views: property.views || 0,
+                        inquiries: propertyInquiries,
+                        score: score,
+                        trend: Math.floor(Math.random() * 20) - 5, // Mock trend for now
+                        color: 'bg-[#d4af37]', // simplified color
+                        image: property.images?.[0]
+                    };
+                }).sort((a, b) => b.views - a.views).slice(0, 5);
+
+                setStats({ totalViews, topListings: processedListings });
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
     return (
         <motion.div
             initial="hidden"
@@ -53,7 +99,7 @@ const InsightsPage = () => {
                             <MdVisibility className="text-2xl" />
                         </div>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Listing Views</p>
-                        <h3 className="text-3xl font-black text-[#1f2937] dark:text-white group-hover:text-[#d4af37] transition-colors">42,894</h3>
+                        <h3 className="text-3xl font-black text-[#1f2937] dark:text-white group-hover:text-[#d4af37] transition-colors">{loading ? '...' : stats.totalViews.toLocaleString()}</h3>
                     </div>
 
                     {/* Conversion Rate Card */}
@@ -204,13 +250,10 @@ const InsightsPage = () => {
 
                     {/* Table Rows */}
                     <div className="space-y-3 mt-4">
-                        {[
-                            { title: 'The Penthouse at Azure', location: 'Miami Beach, FL', views: '12,402', inquiries: '84', score: 92, trend: 18, color: 'bg-[#569886]' },
-                            { title: 'The Glass Estate', location: 'Los Angeles, CA', views: '8,914', inquiries: '42', score: 78, trend: 12, color: 'bg-[#6abca6]' },
-                            { title: 'Skyline Duplex', location: 'New York, NY', views: '6,240', inquiries: '31', score: 81, trend: -3, color: 'bg-[#67847c]' },
-                            { title: 'Villa Mediterraneo', location: 'Naples, FL', views: '4,105', inquiries: '22', score: 65, trend: 8, color: 'bg-[#4a8274]' },
-                            { title: 'Urban Loft', location: 'Chicago, IL', views: '3,200', inquiries: '18', score: 55, trend: 5, color: 'bg-[#569886]' },
-                        ].map((item, i) => (
+                        {loading && <div className="text-center py-8 text-gray-500">Loading insights...</div>}
+                        {!loading && stats.topListings.length === 0 && <div className="text-center py-8 text-gray-500">No listing data available yet.</div>}
+
+                        {stats.topListings.map((item, i) => (
                             <motion.div
                                 key={i}
                                 variants={itemVariants}
@@ -218,8 +261,12 @@ const InsightsPage = () => {
                                 className="grid grid-cols-12 gap-4 items-center p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer border border-transparent hover:border-gray-100 dark:hover:border-gray-700"
                             >
                                 <div className="col-span-12 md:col-span-4 flex items-center gap-4">
-                                    <div className={`size-12 rounded-xl ${item.color} shrink-0 flex items-center justify-center`}>
-                                        <MdHome className="text-white opacity-50 text-xl" />
+                                    <div className={`size-12 rounded-xl bg-gray-200 shrink-0 flex items-center justify-center overflow-hidden`}>
+                                        {item.image ? (
+                                            <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${item.image})` }} />
+                                        ) : (
+                                            <MdHome className="text-gray-400 text-xl" />
+                                        )}
                                     </div>
                                     <div>
                                         <h4 className="text-sm font-bold text-[#1f2937] dark:text-white mb-0.5">{item.title}</h4>

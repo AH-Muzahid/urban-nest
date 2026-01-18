@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getPropertyById } from '@/services/propertyService';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
+import ContactAgentForm from '@/components/property/ContactAgentForm';
+import Reviews from '@/components/property/Reviews';
+import SimilarProperties from '@/components/property/SimilarProperties';
 
 export default function PropertyDetailsPage() {
     const params = useParams();
@@ -13,13 +17,7 @@ export default function PropertyDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    useEffect(() => {
-        if (params.id) {
-            fetchProperty();
-        }
-    }, [params.id]);
-
-    const fetchProperty = async () => {
+    const fetchProperty = useCallback(async () => {
         try {
             const data = await getPropertyById(params.id);
             setProperty(data);
@@ -28,7 +26,13 @@ export default function PropertyDetailsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [params.id]);
+
+    useEffect(() => {
+        if (params.id) {
+            fetchProperty();
+        }
+    }, [params.id, fetchProperty]);
 
     if (loading) {
         return (
@@ -61,7 +65,7 @@ export default function PropertyDetailsPage() {
         <>
             <Navbar />
             <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
-                <div className="container mx-auto px-4 py-12">
+                <div className="max-w-7xl mx-auto px-6 pt-6 pb-12">
                     {/* Breadcrumb */}
                     <nav className="mb-8 flex items-center space-x-2 text-sm text-gray-600">
                         <Link href="/" className="hover:text-purple-600 transition">Home</Link>
@@ -74,10 +78,12 @@ export default function PropertyDetailsPage() {
                     {/* Image Gallery */}
                     <div className="mb-12">
                         <div className="relative h-[500px] rounded-2xl overflow-hidden mb-4">
-                            <img
+                            <Image
                                 src={property.images?.[currentImageIndex] || '/placeholder-property.jpg'}
                                 alt={property.title}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                priority
                             />
                             {property.images?.length > 1 && (
                                 <>
@@ -103,10 +109,10 @@ export default function PropertyDetailsPage() {
                                     <button
                                         key={index}
                                         onClick={() => setCurrentImageIndex(index)}
-                                        className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition ${index === currentImageIndex ? 'border-purple-600' : 'border-transparent'
+                                        className={`relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition ${index === currentImageIndex ? 'border-purple-600' : 'border-transparent'
                                             }`}
                                     >
-                                        <img src={image} alt={`${property.title} ${index + 1}`} className="w-full h-full object-cover" />
+                                        <Image src={image} alt={`${property.title} ${index + 1}`} fill className="object-cover" sizes="96px" />
                                     </button>
                                 ))}
                             </div>
@@ -162,6 +168,26 @@ export default function PropertyDetailsPage() {
                                     </div>
                                 </div>
                             </div>
+                            <div className="bg-white rounded-2xl p-8 shadow-lg">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Location</h2>
+                                <div className="aspect-video w-full rounded-xl overflow-hidden shadow-inner border border-gray-100">
+                                    <iframe
+                                        width="100%"
+                                        height="100%"
+                                        frameBorder="0"
+                                        style={{ border: 0 }}
+                                        src={`https://www.google.com/maps?q=${encodeURIComponent(property.location)}&output=embed`}
+                                        allowFullScreen
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                    ></iframe>
+                                </div>
+                                <p className="mt-4 text-gray-600 text-sm flex items-center gap-2">
+                                    <span className="text-xl">📍</span> {property.location}
+                                </p>
+                            </div>
+
+                            <Reviews propertyId={property._id} />
                         </div>
 
                         {/* Sidebar */}
@@ -172,13 +198,7 @@ export default function PropertyDetailsPage() {
                                     <p className="text-4xl font-bold text-purple-600">${property.price?.toLocaleString()}</p>
                                 </div>
 
-                                <button className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition mb-4">
-                                    Contact Agent
-                                </button>
-
-                                <button className="w-full py-4 border-2 border-purple-600 text-purple-600 font-semibold rounded-lg hover:bg-purple-50 transition">
-                                    Schedule Tour
-                                </button>
+                                <ContactAgentForm propertyId={property._id} ownerId={property.owner?._id} />
 
                                 <div className="mt-8 pt-8 border-t border-gray-200">
                                     <h3 className="font-semibold text-gray-900 mb-4">Property Details</h3>
@@ -200,6 +220,8 @@ export default function PropertyDetailsPage() {
                             </div>
                         </div>
                     </div>
+
+                    <SimilarProperties />
                 </div>
             </main>
             <Footer />

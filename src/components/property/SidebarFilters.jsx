@@ -1,117 +1,179 @@
 'use client';
 
-import { useState } from 'react';
-import { MdSearch, MdApartment, MdVilla, MdHome, MdHolidayVillage } from 'react-icons/md';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { MdSearch, MdApartment, MdVilla, MdHome, MdHolidayVillage, MdSell, MdKey } from 'react-icons/md';
 
 const SidebarFilters = ({ className = "" }) => {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    // State for local inputs before applying (debounce could be added for text)
+    const [location, setLocation] = useState(searchParams.get('location') || '');
+    const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
+    const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
+
+    // Sync local state with URL params on mount/change
+    useEffect(() => {
+        // eslint-disable-next-line
+        setLocation(searchParams.get('location') || '');
+        // eslint-disable-next-line
+        setMinPrice(searchParams.get('minPrice') || '');
+        // eslint-disable-next-line
+        setMaxPrice(searchParams.get('maxPrice') || '');
+    }, [searchParams]);
+
+    const createQueryString = (name, value) => {
+        const params = new URLSearchParams(searchParams);
+        if (value) {
+            params.set(name, value);
+        } else {
+            params.delete(name);
+        }
+        params.delete('page');
+        return params.toString();
+    };
+
+    const updateFilter = (name, value) => {
+        const queryString = createQueryString(name, value);
+        router.push(`${pathname}?${queryString}`);
+    };
+
     const propertyTypes = [
-        { name: 'Penthouse', icon: MdApartment },
-        { name: 'Villa', icon: MdVilla },
-        { name: 'Mansion', icon: MdHome },
-        { name: 'Estate', icon: MdHolidayVillage },
+        { name: 'Penthouse', value: 'penthouse', icon: MdApartment },
+        { name: 'Villa', value: 'villa', icon: MdVilla },
+        { name: 'Mansion', value: 'mansion', icon: MdHome },
+        { name: 'Estate', value: 'estate', icon: MdHolidayVillage },
     ];
 
-    const amenities = [
-        'Infinity Pool', 'Smart Home', 'Gym', 'Private Cinema', 'Wine Cellar', 'Helipad'
+    const listingStatuses = [
+        { name: 'Buy', value: 'sale', icon: MdSell },
+        { name: 'Rent', value: 'rent', icon: MdKey },
     ];
+
+    const currentType = searchParams.get('type');
+    const currentStatus = searchParams.get('status');
+
+    // Simple debounce for text input
+    const handleLocationChange = (e) => {
+        const val = e.target.value;
+        setLocation(val);
+        // In a real app, debounce this. For now, simple onBlur or Enter key is better, 
+        // but we'll specific update on Enter or Blur
+    };
+
+    const applyLocation = () => updateFilter('location', location);
+
+    const clearFilters = () => {
+        router.push(pathname);
+    };
 
     return (
-        <aside className={`w-full lg:w-80 shrink-0 space-y-8 h-full overflow-y-auto no-scrollbar pb-10 ${className}`}>
-            <div>
-                <h1 className="text-2xl font-bold mb-1">Listings</h1>
-                <p className="text-gray-500 text-sm">Showing 150 luxury estates</p>
-            </div>
+        <aside className={`w-full h-full overflow-y-auto no-scrollbar pb-20 ${className}`}>
 
-            {/* Location Search - NEW */}
-            <div className="space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400">Location</h3>
-                <div className="relative">
-                    <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="City, Neighborhood, or Zip"
-                        className="w-full bg-gray-50 dark:bg-gray-900 border border-transparent focus:border-primary rounded-xl py-3 pl-12 pr-4 text-sm font-semibold outline-none transition-all placeholder:font-normal"
-                    />
-                </div>
-            </div>
-
-            {/* Price Range Slider */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400">Price Range</h3>
-                    <button className="text-xs text-primary font-bold hover:underline">RESET</button>
-                </div>
-                <div className="pt-6 px-2">
-                    <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 relative rounded-full">
-                        <div className="absolute h-1 bg-primary left-[20%] right-[30%] rounded-full"></div>
-                        <div className="absolute top-1/2 -translate-y-1/2 left-[20%] size-5 bg-white border-2 border-primary rounded-full cursor-pointer shadow-md hover:scale-110 transition-transform"></div>
-                        <div className="absolute top-1/2 -translate-y-1/2 right-[30%] size-5 bg-white border-2 border-primary rounded-full cursor-pointer shadow-md hover:scale-110 transition-transform"></div>
-                    </div>
-                    <div className="flex justify-between mt-6 text-sm font-bold">
-                        <span className="bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded border border-gray-100 dark:border-gray-700">$1.2M</span>
-                        <span className="bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded border border-gray-100 dark:border-gray-700">$8.5M</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Property Type */}
-            <div className="space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400">Property Type</h3>
-                <div className="grid grid-cols-2 gap-2">
-                    {propertyTypes.map((type) => (
-                        <button
-                            key={type.name}
-                            className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-bold transition-all duration-200 ${type.name === 'Penthouse'
-                                ? 'bg-[#d4af35]/10 border-[#d4af35] text-[#d4af35]'
-                                : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-primary/50 text-gray-600 dark:text-gray-400'
-                                }`}
-                        >
-                            <type.icon className="text-lg" />
-                            {type.name}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Amenities */}
-            <div className="space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400">Amenities</h3>
-                <div className="flex flex-wrap gap-2">
-                    {amenities.map((amenity) => (
-                        <button
-                            key={amenity}
-                            className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 ${amenity === 'Private Cinema'
-                                ? 'bg-[#d4af35] text-white shadow-lg shadow-[#d4af35]/30'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                }`}
-                        >
-                            {amenity}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Square Footage */}
-            <div className="space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400">Square Footage</h3>
-                <div className="flex items-center gap-3">
-                    <input
-                        className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm p-3 focus:ring-2 focus:ring-[#d4af35]/50 outline-none transition-all placeholder:text-gray-400"
-                        placeholder="Min"
-                        type="number"
-                    />
-                    <input
-                        className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm p-3 focus:ring-2 focus:ring-[#d4af35]/50 outline-none transition-all placeholder:text-gray-400"
-                        placeholder="Max"
-                        type="number"
-                    />
-                </div>
-            </div>
-
-            <div className="pt-4">
-                <button className="w-full py-4 rounded-full border-2 border-gray-200 dark:border-gray-800 font-bold text-sm hover:border-black dark:hover:border-white transition-all text-gray-500 hover:text-charcoal dark:hover:text-white">
-                    Clear All Filters
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+                <h1 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Filters</h1>
+                <button onClick={clearFilters} className="text-[10px] font-bold text-red-500 hover:text-red-600">
+                    RESET
                 </button>
+            </div>
+
+            <div className="space-y-5">
+                {/* Location */}
+                <div className="space-y-1.5">
+                    <div className="relative group">
+                        <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-base text-gray-400" />
+                        <input
+                            type="text"
+                            value={location}
+                            onChange={handleLocationChange}
+                            onKeyDown={(e) => e.key === 'Enter' && applyLocation()}
+                            onBlur={applyLocation}
+                            placeholder="Location..."
+                            className="w-full bg-gray-50 dark:bg-gray-800 border border-transparent focus:bg-white focus:border-gray-200 rounded-lg py-2.5 pl-9 pr-3 text-xs font-semibold outline-none transition-all dark:text-white"
+                        />
+                    </div>
+                </div>
+
+                {/* Price */}
+                <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Price Range</label>
+                    <div className="flex gap-2">
+                        <input
+                            className="w-full bg-gray-50 dark:bg-gray-800 border-transparent rounded-lg text-xs py-2.5 px-3 outline-none font-semibold dark:text-white"
+                            placeholder="Min"
+                            type="number"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            onBlur={(e) => updateFilter('minPrice', e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && updateFilter('minPrice', minPrice)}
+                        />
+                        <input
+                            className="w-full bg-gray-50 dark:bg-gray-800 border-transparent rounded-lg text-xs py-2.5 px-3 outline-none font-semibold dark:text-white"
+                            placeholder="Max"
+                            type="number"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            onBlur={(e) => updateFilter('maxPrice', e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && updateFilter('maxPrice', maxPrice)}
+                        />
+                    </div>
+                </div>
+
+                {/* Status */}
+                <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Status</label>
+                    <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                        {listingStatuses.map((statusObj) => {
+                            const isActive = currentStatus === statusObj.value;
+                            return (
+                                <button
+                                    key={statusObj.name}
+                                    onClick={() => updateFilter('status', isActive ? '' : statusObj.value)}
+                                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wide transition-opacity ${isActive
+                                        ? 'bg-white dark:bg-gray-600 text-black dark:text-white shadow-sm'
+                                        : 'text-gray-400 hover:opacity-70'
+                                        }`}
+                                >
+                                    {statusObj.name}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Property Category */}
+                <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Property Type</label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {propertyTypes.map((typeObj) => {
+                            const isActive = currentType === typeObj.value;
+                            return (
+                                <button
+                                    key={typeObj.name}
+                                    onClick={() => updateFilter('type', isActive ? '' : typeObj.value)}
+                                    className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border transition-opacity text-xs font-bold ${isActive
+                                        ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
+                                        : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-500 hover:opacity-70'
+                                        }`}
+                                >
+                                    <typeObj.icon className={isActive ? "text-white dark:text-black text-sm" : "text-gray-400 text-sm"} />
+                                    <span>{typeObj.name}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="pt-2">
+                    <button
+                        onClick={clearFilters}
+                        className="w-full py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:opacity-80 text-gray-600 dark:text-gray-300 font-bold text-xs uppercase"
+                    >
+                        Clear Filters
+                    </button>
+                </div>
             </div>
         </aside>
     );

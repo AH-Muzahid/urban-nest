@@ -6,6 +6,7 @@ import PropertyCategories from '@/components/sections/PropertyCategories';
 import WhyChooseUs from '@/components/sections/WhyChooseUs';
 import Testimonials from '@/components/sections/Testimonials';
 import Newsletter from '@/components/sections/Newsletter';
+import CallToAction from '@/components/sections/CallToAction';
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
         <PropertyCategories />
         <WhyChooseUs />
         <Testimonials />
+        <CallToAction />
         <Newsletter />
       </main>
       <Footer />

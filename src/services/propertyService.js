@@ -4,7 +4,7 @@ import axiosInstance from '@/lib/axios';
 export const getProperties = async (filters = {}) => {
     const queryParams = new URLSearchParams(filters).toString();
     const response = await axiosInstance.get(`/properties?${queryParams}`);
-    return response.data;
+    return response.data; // Now returns { properties: [], totalPages, currentPage, totalProperties }
 };
 
 // Get property by ID

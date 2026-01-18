@@ -22,7 +22,7 @@ export const ComparisonProvider = ({ children }) => {
     }, [compareList]);
 
     const addToCompare = (property) => {
-        if (compareList.find(p => p.id === property.id)) {
+        if (compareList.find(p => p._id === property._id)) {
             toast.error('Property already in comparison list');
             return;
         }
@@ -35,7 +35,7 @@ export const ComparisonProvider = ({ children }) => {
     };
 
     const removeFromCompare = (propertyId) => {
-        setCompareList(compareList.filter(p => p.id !== propertyId));
+        setCompareList(compareList.filter(p => p._id !== propertyId));
     };
 
     const clearCompare = () => {

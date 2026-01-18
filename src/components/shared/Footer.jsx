@@ -41,7 +41,7 @@ const Footer = () => {
 
     return (
         <footer className="bg-charcoal text-white pt-24 pb-12">
-            <div className="max-w-7xl mx-auto px-6">
+            <div className="max-w-8xl mx-auto px-6">
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
@@ -69,6 +69,8 @@ const Footer = () => {
                                     whileTap={{ scale: 0.9 }}
                                     className="size-10 rounded-full border border-gray-700 flex items-center justify-center text-gray-400 hover:text-primary transition-all"
                                     aria-label={social.label}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                 >
                                     <social.icon className="text-lg" />
                                 </motion.a>
@@ -110,11 +112,11 @@ const Footer = () => {
                         <ul className="space-y-4 text-sm text-gray-500">
                             <li className="flex items-center gap-3">
                                 <MdCall className="text-primary text-base flex-shrink-0" />
-                                <span>+1 (800) LUX-URBN</span>
+                                <a href="tel:+18005898726" className="hover:text-white transition-colors">+1 (800) LUX-URBN</a>
                             </li>
                             <li className="flex items-center gap-3">
                                 <MdMail className="text-primary text-base flex-shrink-0" />
-                                <span>concierge@urbannest.com</span>
+                                <a href="mailto:concierge@urbannest.com" className="hover:text-white transition-colors">concierge@urbannest.com</a>
                             </li>
                             <li className="flex items-start gap-3">
                                 <MdLocationOn className="text-primary text-base flex-shrink-0 mt-0.5" />
