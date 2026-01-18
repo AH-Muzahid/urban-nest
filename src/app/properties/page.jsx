@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import SidebarFilters from '@/components/property/SidebarFilters';
@@ -9,7 +9,7 @@ import PropertyCardSkeleton from '@/components/property/PropertyCardSkeleton';
 import MapViewToggle from '@/components/property/MapViewToggle';
 import { MdGridView, MdViewList, MdClose, MdKeyboardArrowDown, MdFilterList, MdMap } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'; // Added useRouter, usePathname
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { getProperties } from '@/services/propertyService';
 import dynamic from 'next/dynamic';
 
@@ -18,12 +18,12 @@ const PropertyMap = dynamic(() => import('@/components/property/PropertyMap'), {
     loading: () => <div className="h-full w-full bg-gray-100 flex items-center justify-center">Loading Map...</div>
 });
 
-const PropertiesPage = () => {
+const PropertiesContent = () => {
     const [viewMode, setViewMode] = useState('grid');
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
     const [properties, setProperties] = useState([]);
-    const [loading, setLoading] = useState(true); // Initial hard load
-    const [isFetching, setIsFetching] = useState(false); // Background update
+    const [loading, setLoading] = useState(true);
+    const [isFetching, setIsFetching] = useState(false);
     const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1 });
     const [isSortOpen, setIsSortOpen] = useState(false);
     const sortDropdownRef = useRef(null);
@@ -264,8 +264,6 @@ const PropertiesPage = () => {
                     {/* Pagination */}
                     {viewMode !== 'map' && pagination.totalPages > 1 && (
                         <div className="mt-20 flex flex-col items-center gap-8">
-                            {/* Only show Load More if logic dictates, typically distinct from numeric pagination. We'll stick to numeric for now. */}
-
                             <div className="flex items-center gap-2">
                                 <button
                                     disabled={pagination.currentPage === 1}
@@ -277,9 +275,6 @@ const PropertiesPage = () => {
 
                                 {[...Array(pagination.totalPages)].map((_, index) => {
                                     const pageNum = index + 1;
-                                    // Simple logic to show a few pages around current. For simplicty, showing all for small counts, or just basic mapping.
-                                    // Given user just wants it to work "kaj korchena", displaying simple numeric list is best.
-                                    // For 50 items / 9 per page = ~6 pages.
                                     return (
                                         <button
                                             key={pageNum}
@@ -309,6 +304,14 @@ const PropertiesPage = () => {
             <MapViewToggle onClick={() => setViewMode(viewMode === 'map' ? 'grid' : 'map')} isMapOpen={viewMode === 'map'} />
             <Footer />
         </div>
+    );
+};
+
+const PropertiesPage = () => {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50 text-charcoal font-bold tracking-widest uppercase">Loading Properties...</div>}>
+            <PropertiesContent />
+        </Suspense>
     );
 };
 
