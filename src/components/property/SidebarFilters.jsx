@@ -14,14 +14,13 @@ const SidebarFilters = ({ className = "" }) => {
     const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
     const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
 
-    // Sync local state with URL params on mount/change
     useEffect(() => {
-        // eslint-disable-next-line
-        setLocation(searchParams.get('location') || '');
-        // eslint-disable-next-line
-        setMinPrice(searchParams.get('minPrice') || '');
-        // eslint-disable-next-line
-        setMaxPrice(searchParams.get('maxPrice') || '');
+        const timer = setTimeout(() => {
+            setLocation(searchParams.get('location') || '');
+            setMinPrice(searchParams.get('minPrice') || '');
+            setMaxPrice(searchParams.get('maxPrice') || '');
+        }, 0);
+        return () => clearTimeout(timer);
     }, [searchParams]);
 
     const createQueryString = (name, value) => {

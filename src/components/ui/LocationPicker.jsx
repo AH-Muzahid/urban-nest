@@ -56,8 +56,16 @@ const LocationPicker = ({ onLocationSelect, initialLocation }) => {
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        if (initialLocation && initialLocation.lat && initialLocation.lng) {
-            setPosition(initialLocation);
+        if (initialLocation?.lat && initialLocation?.lng) {
+            const timer = setTimeout(() => {
+                setPosition((prev) => {
+                    if (prev && prev.lat === initialLocation.lat && prev.lng === initialLocation.lng) {
+                        return prev;
+                    }
+                    return initialLocation;
+                });
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [initialLocation]);
 
