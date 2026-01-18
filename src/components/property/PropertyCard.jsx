@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { MdFavorite, MdBed, MdBathtub, MdSquareFoot, MdArrowForward, MdCompareArrows, MdLocationOn } from 'react-icons/md';
 import { useComparison } from '@/context/ComparisonContext';
@@ -38,10 +39,13 @@ const PropertyCard = ({ property, viewMode = 'grid' }) => {
             className={`group bg-white rounded-2xl overflow-hidden shadow-sm transition-all duration-300 flex ${viewMode === 'list' ? 'flex-col md:flex-row' : 'flex-col'}`}
         >
             <div className={`relative overflow-hidden ${viewMode === 'list' ? 'h-48 md:h-auto md:w-2/5' : 'h-52'}`}>
-                <Link href={`/properties/${property._id}`} className="block w-full h-full">
-                    <div
-                        className="w-full h-full bg-cover bg-center transition-transform duration-700"
-                        style={{ backgroundImage: `url('${property.images?.[0] || '/placeholder.jpg'}')` }}
+                <Link href={`/properties/${property._id}`} className="block w-full h-full relative">
+                    <Image
+                        src={property.images?.[0] || '/placeholder.jpg'}
+                        alt={property.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                        unoptimized
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
                 </Link>
