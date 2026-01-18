@@ -1,11 +1,13 @@
 import axiosInstance from '@/lib/axios';
 
 // Login
+// Login
 export const login = async (credentials) => {
     const response = await axiosInstance.post('/auth/login', credentials);
     if (response.data.token) {
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        const { token, ...user } = response.data;
+        localStorage.setItem('user', JSON.stringify(user));
     }
     return response.data;
 };
